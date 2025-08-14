@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: S3 bucket with secure settings
+Description: Secure S3 bucket with best practices
 Resources:
   GoodBucket:
     Type: AWS::S3::Bucket
@@ -10,3 +10,14 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Environment
+          Value: Production
+        - Key: Owner
+          Value: DevOpsTeam
