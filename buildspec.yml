@@ -2,10 +2,10 @@ version: 0.2
 
 env:
   variables:
-    TEMPLATE_PATH: "cloudformation/s3-bucket-bad.yaml"
+    TEMPLATE_PATH: "cloudformation/s3-bucket-good.yaml"
     API_BASE_URL: "https://conformity.us-1.cloudone.trendmicro.com/api"
   secrets-manager:
-    CONFORMITY_API_KEY: "conformityApiKey"
+    CONFORMITY_API_KEY: "tmc131HnWo32q1gGnd7u4xBIsFyeDME"
 
 phases:
   install:
