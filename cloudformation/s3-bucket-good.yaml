@@ -16,8 +16,27 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !Sub good-bucket-logs-${AWS::AccountId}-${AWS::Region}
+        LogFilePrefix: access-logs/
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Prefix: ""
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 30
       Tags:
         - Key: Environment
           Value: Production
-        - Key: Owner
-          Value: DevOpsTeam
+        - Key: Role
+          Value: BackupStorage
+        - Key: Name
+          Value: GoodBucket
+
+  GoodBucketLogs:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub good-bucket-logs-${AWS::AccountId}-${AWS::Region}
+      AccessControl: LogDeliveryWrite
