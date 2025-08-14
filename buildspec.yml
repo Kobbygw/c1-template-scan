@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+  variables:
+    TEMPLATE_PATH: "cloudformation/s3-bucket-bad.yaml"
+    API_BASE_URL: "https://conformity.us-1.cloudone.trendmicro.com/api"
+  secrets-manager:
+    CONFORMITY_API_KEY: "conformityApiKey"
+
+phases:
+  install:
+    commands:
+      - yum -y install jq
+  build:
+    commands:
+      - echo "Scanning ${TEMPLATE_PATH}"
+      - CONTENTS=$(cat "${TEMPLATE_PATH}" | jq -MRs '.')
+      - PAYLOAD="{\"data\":{\"attributes\":{\"type\":\"cloudformation-template\",\"contents\":${CONTENTS}}}}"
+      - echo "$PAYLOAD" > payload.json
+
+      - |
+        curl -s -X POST \
+          -H "Authorization: ApiKey ${CONFORMITY_API_KEY}" \
+          -H "Content-Type: application/vnd.api+json" \
+          "${API_BASE_URL}/template-scanner/scan" \
+          --data-binary "@payload.json" \
+          | tee scan-result.json | jq -M '.'
+
+      - BLOCKING_FAILS=$(jq '[ .data[] | select(.attributes.status=="FAILURE") | select((.attributes["risk-level"]=="MEDIUM") or (.attributes["risk-level"]=="HIGH")) ] | length' scan-result.json)
+      - if [ "${BLOCKING_FAILS}" -gt 0 ]; then echo "Blocking due to ${BLOCKING_FAILS} medium+ findings"; exit 1; fi
+
+artifacts:
+  files:
+    - scan-result.json

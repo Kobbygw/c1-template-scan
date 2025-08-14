@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 bucket with risky settings
+Resources:
+  BadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub bad-bucket-${AWS::AccountId}-${AWS::Region}
+      AccessControl: PublicRead
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
